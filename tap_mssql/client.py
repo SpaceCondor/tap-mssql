@@ -250,7 +250,7 @@ class MSSQLChangeTrackingStream(SQLStream):
     @cached_property
     def minimum_valid_version(self):
         return t.cast(MSSQLConnector, self.connector).get_minimum_valid_version(
-            self.fully_qualified_name)
+            self.fully_qualified_name.table)
 
     @cached_property
     def table_is_change_tracking_enabled(self) -> bool:
