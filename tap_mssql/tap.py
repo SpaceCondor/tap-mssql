@@ -5,11 +5,11 @@ from __future__ import annotations
 import copy
 from typing import Sequence
 
-from singer_sdk import SQLTap, Stream, SQLStream
+from singer_sdk import SQLStream, SQLTap, Stream
 from singer_sdk import typing as th  # JSON schema typing helpers
-from singer_sdk._singerlib import Catalog, Schema, Metadata
+from singer_sdk._singerlib import Catalog, Metadata, Schema
 
-from tap_mssql.client import MSSQLStream, MSSQLChangeTrackingStream
+from tap_mssql.client import MSSQLChangeTrackingStream, MSSQLStream
 
 
 class TapMSSQL(SQLTap):
@@ -53,24 +53,32 @@ class TapMSSQL(SQLTap):
                     th.Property(
                         "key",
                         th.StringType,
-                        description="Key of the sqlalchemy URL query option. Example: driver"
+                        description=(
+                            "Key of the sqlalchemy URL query option. "
+                            "Example: driver"
+                        )
                     ),
                     th.Property(
                         "value",
                         th.StringType,
-                        description="Value of the sqlalchemy URL query option. Example: ODBC Driver 18 for SQL Server"
+                        description=(
+                            "Value of the sqlalchemy URL query option. "
+                            "Example: ODBC Driver 18 for SQL Server"
+                        )
                     )
                 )
             ),
-            description=("List of SQLAlchemy URL Query options to provide. Example:" +
-                         " driver, TrustServerCertificate, etc."
-                         )
+            description=("List of SQLAlchemy URL Query options to provide. Example: "
+                         "driver, TrustServerCertificate, etc.")
         ),
         th.Property(
             "sqlalchemy_url_query",
             th.StringType,
             secret=True,
-            description="SQLAlchemy URL. Setting this will take precedence over other connection settings."
+            description=(
+                "SQLAlchemy URL. Setting this will take "
+                "precedence over other connection settings."
+            )
         ),
         th.Property(
             "default_replication_method",
@@ -85,7 +93,7 @@ class TapMSSQL(SQLTap):
     ).to_dict()
 
     @property
-    def catalog(self) -> Catalog:
+    def catalog(self) -> Catalog:  # noqa: C901
         """Get the tap's working catalog.
 
         Override to do LOG_BASED modifications.
@@ -102,36 +110,42 @@ class TapMSSQL(SQLTap):
                     new_stream.replication_method == "LOG_BASED"
                     and new_stream.schema.properties
             ):
-                for property in new_stream.schema.properties.values():
-                    if "null" not in property.type:
-                        if isinstance(property.type, list):
-                            property.type.append("null")
+                for schema_property in new_stream.schema.properties.values():
+                    if "null" not in schema_property.type:
+                        if isinstance(schema_property.type, list):
+                            schema_property.type.append("null")
                         else:
-                            property.type = [property.type, "null"]
+                            schema_property.type = [schema_property.type, "null"]
                 if new_stream.schema.required:
                     stream_modified = True
                     new_stream.schema.required = None
                 if "_sdc_deleted_at" not in new_stream.schema.properties:
                     stream_modified = True
+
                     new_stream.schema.properties.update(
                         {"_sdc_deleted_at": Schema(type=["string", "null"])}
                     )
+
                     new_stream.metadata.update(
                         {
                             ("properties", "_sdc_deleted_at"): Metadata(
-                                Metadata.InclusionType.AVAILABLE, True, None
+                                inclusion=Metadata.InclusionType.AVAILABLE,
+                                selected=True
                             )
                         }
                     )
                 if "_sdc_change_version" not in new_stream.schema.properties:
                     stream_modified = True
+
                     new_stream.schema.properties.update(
                         {"_sdc_change_version": Schema(type=["integer", "null"])}
                     )
+
                     new_stream.metadata.update(
                         {
                             ("properties", "_sdc_change_version"): Metadata(
-                                Metadata.InclusionType.AVAILABLE, True, None
+                                inclusion=Metadata.InclusionType.AVAILABLE,
+                                selected=True
                             )
                         }
                     )
@@ -141,17 +155,18 @@ class TapMSSQL(SQLTap):
         if modified_streams:
             self.logger.info(
                 "One or more LOG_BASED catalog entries were modified "
-                f"({modified_streams=}) to allow nullability and include _sdc columns. "
-                "See README for further information."
+                "(%s) to allow nullability and include _sdc columns. "
+                "See README for further information.",
+                modified_streams
             )
         return new_catalog
 
     def discover_streams(self) -> Sequence[Stream]:
         """Initialize all available streams and return them as a list.
 
-                Returns:
-                    List of discovered Stream objects.
-                """
+        Returns:
+            List of discovered Stream objects.
+        """
         streams: list[SQLStream] = []
         for catalog_entry in self.catalog_dict["streams"]:
             if catalog_entry["replication_method"] == "LOG_BASED":

@@ -12,8 +12,12 @@ sqlserver.start()
 mssql_url_str = sqlserver.get_connection_url()
 mssql_url = sa.make_url(mssql_url_str)
 mssql_url = mssql_url.update_query_string(
-    "driver=ODBC Driver 18 for SQL Server&TrustServerCertificate=Yes&autocommit=true&authentication=SqlPassword",
-    True)
+    (
+        "driver=ODBC Driver 18 for SQL Server&"
+        "TrustServerCertificate=Yes&autocommit=true&authentication=SqlPassword"
+    ),
+    append=True
+)
 
 engine = sa.create_engine(mssql_url)
 with engine.connect() as connection:
@@ -21,7 +25,8 @@ with engine.connect() as connection:
     connection.commit()
 
 # Replace DB in the connection string
-singer_url = mssql_url.render_as_string(hide_password=False).replace(mssql_url.database, "singer")
+singer_url = (mssql_url.render_as_string(hide_password=False)
+              .replace(mssql_url.database, "singer"))
 
 fake = Faker()
 engine = sa.create_engine(singer_url)
@@ -35,10 +40,14 @@ with engine.connect() as connection:
                                 );"""))
     connection.commit()
 
-    for _ in range(10):
-        connection.execute(sa.text("""INSERT INTO Persons (LastName, FirstName, Address, City)
-                              VALUES (:lastname, :firstname, :address, :city)
-                           """), {
+    for _ in range(50):
+        connection.execute(
+            sa.text(
+                """
+                    INSERT INTO Persons (LastName, FirstName, Address, City)
+                    VALUES (:lastname, :firstname, :address, :city)
+                """
+            ), {
             "lastname": fake.last_name(),
             "firstname": fake.first_name(),
             "address": fake.street_address(),
@@ -52,7 +61,8 @@ SAMPLE_CONFIG = {
 
 TestTapMSSQL = get_tap_test_class(
     tap_class=TapMSSQL,
-    config=SAMPLE_CONFIG
+    config=SAMPLE_CONFIG,
+    catalog="tests/resources/persons_catalog.json",
 )
 
 

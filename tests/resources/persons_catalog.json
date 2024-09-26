@@ -1,0 +1,115 @@
+{
+  "streams": [
+    {
+      "tap_stream_id": "dbo-Persons",
+      "table_name": "Persons",
+      "replication_method": "",
+      "key_properties": [
+        "PersonID"
+      ],
+      "schema": {
+        "properties": {
+          "PersonID": {
+            "type": [
+              "integer"
+            ]
+          },
+          "LastName": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "FirstName": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "Address": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "City": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "PersonID"
+        ]
+      },
+      "is_view": false,
+      "stream": "dbo-Persons",
+      "metadata": [
+        {
+          "breadcrumb": [
+            "properties",
+            "PersonID"
+          ],
+          "metadata": {
+            "inclusion": "automatic",
+            "selected": true
+          }
+        },
+        {
+          "breadcrumb": [
+            "properties",
+            "LastName"
+          ],
+          "metadata": {
+            "inclusion": "available",
+            "selected": true
+          }
+        },
+        {
+          "breadcrumb": [
+            "properties",
+            "FirstName"
+          ],
+          "metadata": {
+            "inclusion": "available",
+            "selected": true
+          }
+        },
+        {
+          "breadcrumb": [
+            "properties",
+            "Address"
+          ],
+          "metadata": {
+            "inclusion": "available",
+            "selected": true
+          }
+        },
+        {
+          "breadcrumb": [
+            "properties",
+            "City"
+          ],
+          "metadata": {
+            "inclusion": "available",
+            "selected": true
+          }
+        },
+        {
+          "breadcrumb": [],
+          "metadata": {
+            "inclusion": "available",
+            "table-key-properties": [
+              "PersonID"
+            ],
+            "forced-replication-method": "",
+            "schema-name": "dbo",
+            "selected": true
+          }
+        }
+      ]
+    }
+  ]
+}
