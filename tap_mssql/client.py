@@ -299,26 +299,6 @@ class MSSQLChangeTrackingStream(SQLStream):
 
             query = table.select()
 
-            if self.replication_key:
-                replication_key_col = table.columns[self.replication_key]
-                order_by = (
-                    sa.nulls_first(replication_key_col.asc())
-                    if self.supports_nulls_first
-                    else replication_key_col.asc()
-                )
-                query = query.order_by(order_by)
-
-                if replication_key_col.type.python_type in (
-                        datetime.datetime,
-                        datetime.date
-                ):
-                    start_val = self.get_starting_timestamp(context)
-                else:
-                    start_val = self.get_starting_replication_key_value(context)
-
-                if start_val:
-                    query = query.where(replication_key_col >= start_val)
-
             if self.ABORT_AT_RECORD_COUNT is not None:
                 # Limit record count to one greater than the abort threshold.
                 # This ensures `MaxRecordsLimitException` exception is properly
