@@ -20,6 +20,11 @@ jobs:
       uses: actions/setup-python@v5
       with:
         python-version: ${{ matrix.python-version }}
+    - name: Set up SQL Server container
+      run: |
+        docker compose -f docker-compose.yml up -d
+    - name: Sleep for 30 seconds
+      run: sleep 30s
     - name: Install ODBC
       working-directory: ${{ github.workspace }}/.github
       run: bash ./install-odbc.sh

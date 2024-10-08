@@ -9,7 +9,6 @@ import datetime
 import typing as t
 from functools import cached_property
 
-import sqlalchemy as sa
 from singer_sdk import SQLConnector, SQLStream
 from singer_sdk.helpers._state import increment_state
 from sqlalchemy import URL, text
@@ -39,7 +38,8 @@ class MSSQLConnector(SQLConnector):
             port=config.get("port"),
             database=config.get("database"),
             query={
-                option["key"]: option["value"] for option in config.get("sqlalchemy_url_query_options", [])  # noqa: E501
+                option["key"]: option["value"]
+                for option in config.get("sqlalchemy_url_query_options", [])
             }
         )
 
@@ -110,68 +110,12 @@ class MSSQLConnector(SQLConnector):
                 )
             ).first()[0]
 
+
 class MSSQLStream(SQLStream):
     """Stream class for MSSQL streams."""
 
     connector_class = MSSQLConnector
     supports_nulls_first = False
-
-    # Get records from stream
-    def get_records(self, context: Context | None) -> t.Iterable[dict[str, t.Any]]:
-        """Return a generator of record-type dictionary objects.
-
-        If the stream has a replication_key value defined, records will be sorted by the
-        incremental key. If the stream also has an available starting bookmark, the
-        records will be filtered for values greater than or equal to the bookmark value.
-
-        Args:
-            context: If partition context is provided, will read specifically from this
-                data slice.
-
-        Yields:
-            One dict per record.
-
-        Raises:
-            NotImplementedError: If partition is passed in context and the stream does
-                not support partitioning.
-        """
-        if context:
-            msg = f"Stream '{self.name}' does not support partitioning."
-            raise NotImplementedError(msg)
-
-        selected_column_names = self.get_selected_schema()["properties"].keys()
-        table = self.connector.get_table(
-            full_table_name=self.fully_qualified_name,
-            column_names=selected_column_names,
-        )
-        query = table.select()
-
-        if self.replication_key:
-            replication_key_col = table.columns[self.replication_key]
-            order_by = (
-                sa.nulls_first(replication_key_col.asc())
-                if self.supports_nulls_first
-                else replication_key_col.asc()
-            )
-            query = query.order_by(order_by)
-
-            start_val = self.get_starting_replication_key_value(context)
-            if start_val:
-                query = query.where(replication_key_col >= start_val)
-
-        if self.ABORT_AT_RECORD_COUNT is not None:
-            # Limit record count to one greater than the abort threshold. This ensures
-            # `MaxRecordsLimitException` exception is properly raised by caller
-            # `Stream._sync_records()` if more records are available than can be
-            # processed.
-            query = query.limit(self.ABORT_AT_RECORD_COUNT + 1)
-
-        with self.connector._connect() as conn:  # noqa: SLF001
-            for record in conn.execute(query).mappings():
-                transformed_record = self.post_process(dict(record))
-                if transformed_record is None:
-                    continue
-                yield transformed_record
 
 
 class MSSQLChangeTrackingStream(SQLStream):
@@ -191,13 +135,9 @@ class MSSQLChangeTrackingStream(SQLStream):
         """
         schema_dict = t.cast(dict, self._singer_catalog_entry.schema.to_dict())
 
-        schema_dict["properties"].update({
-            "_sdc_deleted_at": {"type": ["string", "null"]}
-        })
+        schema_dict["properties"].update({"_sdc_deleted_at": {"type": ["string"]}})
 
-        schema_dict["properties"].update({
-            "_sdc_change_version": {"type": ["integer", "null"]}
-        })
+        schema_dict["properties"].update({"_sdc_change_version": {"type": ["integer"]}})
         return schema_dict
 
     @cached_property
@@ -238,8 +178,7 @@ class MSSQLChangeTrackingStream(SQLStream):
         """
         return t.cast(MSSQLConnector, self._connector)
 
-
-    def get_records(self, context: Context | None) -> t.Iterable[dict[str, t.Any]]:  # noqa: C901, PLR0912
+    def get_records(self, context: Context | None) -> t.Iterable[dict[str, t.Any]]:
         """Return a generator of record-type dictionary objects.
 
         If the stream has a replication_key value defined, records will be sorted by the
@@ -287,6 +226,8 @@ class MSSQLChangeTrackingStream(SQLStream):
                 "than current-log-version. Executing a full table sync."
             )
 
+        # Remove _sdc_deleted_at and _sdc_change_version from the list of selected
+        # columns. They are not columns in the actual table.
         selected_column_names = list(self.get_selected_schema()["properties"].keys())
         selected_column_names.remove("_sdc_deleted_at")
         selected_column_names.remove("_sdc_change_version")
@@ -308,25 +249,31 @@ class MSSQLChangeTrackingStream(SQLStream):
 
         else:
 
-            selected_columns = ", ".join(
-                f"tb.{self.connector.quote(column)}" for column in selected_column_names
+            table_selected_columns = ", ".join(
+                f"tb.{column}" for column in selected_column_names if
+                column not in self.primary_keys
+            )
+
+            primary_key_selected_columns = ", ".join(
+                f"c.{primary_key}" for primary_key in self.primary_keys
             )
 
             primary_key_conditions = " AND ".join(
                 f"tb.{primary_key} = c.{primary_key}" for primary_key in self.primary_keys  # noqa: E501
             )
 
-
+            previous_version = int(bookmark)
             query = text(
                 f"""
                 SELECT
                     c.SYS_CHANGE_VERSION AS _sdc_change_version,
-                    c.SYS_CHANGE_OPERATION AS _sdc_deleted_at,
-                    {selected_columns}
+                    c.SYS_CHANGE_OPERATION AS _sdc_change_operation,
+                    {primary_key_selected_columns},
+                    {table_selected_columns}
                 FROM
                     CHANGETABLE (
                         CHANGES {self.connector.quote(str(self.fully_qualified_name))},
-                        {self.change_tracking_current_version}
+                        {previous_version}
                     ) AS c
                 LEFT JOIN
                     {self.connector.quote(str(self.fully_qualified_name))} AS tb
@@ -334,7 +281,7 @@ class MSSQLChangeTrackingStream(SQLStream):
                     {primary_key_conditions}
                 ORDER BY
                     c.SYS_CHANGE_VERSION ASC
-                """ # noqa: S608, RUF100
+                """  # noqa: S608, RUF100
             )
 
         with self.connector._connect() as conn:  # noqa: SLF001
@@ -362,15 +309,13 @@ class MSSQLChangeTrackingStream(SQLStream):
         if "_sdc_change_version" not in row:
             row.update({"_sdc_change_version": self.change_tracking_current_version})
 
-        if row.get("_sdc_deleted_at", "") == "D":
-
+        if row.pop("_sdc_change_operation", "") == "D":
             row.update(
                 {
                     "_sdc_deleted_at": datetime.datetime.now(tz=datetime.timezone.utc)
-                                                        .strftime(r"%Y-%m-%dT%H:%M:%SZ")
+                    .strftime(r"%Y-%m-%dT%H:%M:%SZ")
                 }
             )
-
         else:
             row.update({"_sdc_deleted_at": None})
 

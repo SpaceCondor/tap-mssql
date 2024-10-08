@@ -3,7 +3,7 @@
     {
       "tap_stream_id": "dbo-Persons",
       "table_name": "Persons",
-      "replication_method": "",
+      "replication_method": "LOG_BASED",
       "key_properties": [
         "PersonID"
       ],
@@ -58,10 +58,14 @@
             ],
             "forced-replication-method": "",
             "schema-name": "dbo",
-            "selected": true
+            "selected": true,
+            "replication_method": "LOG_BASED",
+            "replication-key": "_sdc_change_version"
           }
         }
-      ]
+      ],
+      "selected": true,
+      "replication_key": "_sdc_change_version"
     }
   ]
 }

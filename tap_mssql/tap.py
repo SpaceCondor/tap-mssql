@@ -145,7 +145,8 @@ class TapMSSQL(SQLTap):
                         {
                             ("properties", "_sdc_change_version"): Metadata(
                                 inclusion=Metadata.InclusionType.AVAILABLE,
-                                selected=True
+                                selected=True,
+                                selected_by_default=None
                             )
                         }
                     )
