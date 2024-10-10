@@ -1,0 +1,183 @@
+{
+  "streams": [
+    {
+      "tap_stream_id": "dbo-Persons",
+      "table_name": "Persons",
+      "replication_method": "LOG_BASED",
+      "key_properties": [
+        "PersonID"
+      ],
+      "schema": {
+        "properties": {
+          "PersonID": {
+            "type": [
+              "integer"
+            ]
+          },
+          "External": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "ä": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "_data": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "#oid": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "S p a c e": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "[brackets]": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "\"QUOTE\"": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "TABLE": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "PersonID"
+        ]
+      },
+      "is_view": false,
+      "stream": "dbo-Persons",
+      "metadata": [
+        {
+          "breadcrumb": [
+            "properties",
+            "PersonID"
+          ],
+          "metadata": {
+            "inclusion": "automatic",
+            "selected": true
+          }
+        },
+        {
+          "breadcrumb": [
+            "properties",
+            "External"
+          ],
+          "metadata": {
+            "inclusion": "available",
+            "selected": true
+          }
+        },
+        {
+          "breadcrumb": [
+            "properties",
+            "ä"
+          ],
+          "metadata": {
+            "inclusion": "available",
+            "selected": true
+          }
+        },
+        {
+          "breadcrumb": [
+            "properties",
+            "_data"
+          ],
+          "metadata": {
+            "inclusion": "available",
+            "selected": true
+          }
+        },
+        {
+          "breadcrumb": [
+            "properties",
+            "#oid"
+          ],
+          "metadata": {
+            "inclusion": "available",
+            "selected": true
+          }
+        },
+        {
+          "breadcrumb": [
+            "properties",
+            "S p a c e"
+          ],
+          "metadata": {
+            "inclusion": "available",
+            "selected": true
+          }
+        },
+        {
+          "breadcrumb": [
+            "properties",
+            "[brackets]"
+          ],
+          "metadata": {
+            "inclusion": "available",
+            "selected": true
+          }
+        },
+        {
+          "breadcrumb": [
+            "properties",
+            "\"QUOTE\""
+          ],
+          "metadata": {
+            "inclusion": "available",
+            "selected": true
+          }
+        },
+        {
+          "breadcrumb": [
+            "properties",
+            "TABLE"
+          ],
+          "metadata": {
+            "inclusion": "available",
+            "selected": true
+          }
+        },
+        {
+          "breadcrumb": [],
+          "metadata": {
+            "inclusion": "available",
+            "table-key-properties": [
+              "PersonID"
+            ],
+            "forced-replication-method": "",
+            "schema-name": "dbo",
+            "selected": true,
+            "replication_method": "LOG_BASED",
+            "replication-key": "_sdc_change_version"
+          }
+        }
+      ],
+      "selected": true,
+      "replication_key": "_sdc_change_version"
+    }
+  ]
+}

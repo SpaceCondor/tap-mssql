@@ -210,7 +210,7 @@ class MSSQLChangeTrackingStream(SQLStream):
             )
         elif not change_tracking_enabled:
             using_change_tracking = False
-            self.logger.warning(
+            self.logger.error(
                 "Table is not enabled for CHANGE_TRACKING. "
                 "Executing a full table sync instead."
             )
@@ -250,16 +250,18 @@ class MSSQLChangeTrackingStream(SQLStream):
         else:
 
             table_selected_columns = ", ".join(
-                f"tb.{column}" for column in selected_column_names if
+                f"tb.{self.connector.quote(column)}" for column in selected_column_names if
                 column not in self.primary_keys
             )
 
             primary_key_selected_columns = ", ".join(
-                f"c.{primary_key}" for primary_key in self.primary_keys
+                f"c.{self.connector.quote(primary_key)}" for primary_key in self.primary_keys
             )
 
             primary_key_conditions = " AND ".join(
-                f"tb.{primary_key} = c.{primary_key}" for primary_key in self.primary_keys  # noqa: E501
+                f"tb.{self.connector.quote(primary_key)} = c.{self.connector.quote(primary_key)}"
+                for primary_key in
+                self.primary_keys
             )
 
             previous_version = int(bookmark)

@@ -29,6 +29,58 @@ SAMPLE_CONFIG_CORE = {
     ]
 }
 
+SAMPLE_CONFIG_COLUMN_NAMES = {
+    "host": "localhost",
+    "port": 1433,
+    "username": "sa",
+    "password": "!Melty8Melty!",
+    "database": "melty_column_names",
+    "sqlalchemy_url_query_options": [
+        {
+            "key": "driver",
+            "value": "ODBC Driver 18 for SQL Server"
+        },
+        {
+            "key": "TrustServerCertificate",
+            "value": "Yes"
+        },
+        {
+            "key": "authentication",
+            "value": "SqlPassword"
+        },
+        {
+            "key": "autocommit",
+            "value": "true"
+        }
+    ]
+}
+
+SAMPLE_CONFIG_COLUMN_NAMES_CHANGE_TRACKING = {
+    "host": "localhost",
+    "port": 1433,
+    "username": "sa",
+    "password": "!Melty8Melty!",
+    "database": "melty_column_names_ct",
+    "sqlalchemy_url_query_options": [
+        {
+            "key": "driver",
+            "value": "ODBC Driver 18 for SQL Server"
+        },
+        {
+            "key": "TrustServerCertificate",
+            "value": "Yes"
+        },
+        {
+            "key": "authentication",
+            "value": "SqlPassword"
+        },
+        {
+            "key": "autocommit",
+            "value": "true"
+        }
+    ]
+}
+
 SAMPLE_CONFIG_CHANGE_TRACKING = {
     "host": "localhost",
     "port": 1433,
