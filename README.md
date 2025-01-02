@@ -16,11 +16,11 @@ Built with the [Meltano Tap SDK](https://sdk.meltano.com) for Singer Taps.
 
 ## Supported Python Versions
 
-* 3.8
 * 3.9
 * 3.10
 * 3.11
 * 3.12
+* 3.13
 
 A full list of supported settings and capabilities for this
 tap is available by running:
