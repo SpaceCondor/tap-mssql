@@ -1,6 +1,6 @@
 # tap-mssql
 
-`tap-mssql` is a Singer tap for MSSQL.
+`tap-mssql` is a Singer tap for MSSQL / SQL Server. 
 
 Built with the [Meltano Tap SDK](https://sdk.meltano.com) for Singer Taps.
 
@@ -14,16 +14,11 @@ Built with the [Meltano Tap SDK](https://sdk.meltano.com) for Singer Taps.
 * `schema-flattening`
 * `batch`
 
-## Supported Python Versions
+## Supported Python Versions and SQL Server Versions
 
-* 3.9
-* 3.10
-* 3.11
-* 3.12
-* 3.13
-
-A full list of supported settings and capabilities for this
-tap is available by running:
+This tap is tested with Python 3.9 to 3.13. The tap is tested with SQL Server 2022, but should support all versions
+compatible with pyodbc assuming you have the correct ODBC driver installed. More information on setting up drivers
+is available in the pyodbc [documentation](https://github.com/mkleehammer/pyodbc/wiki).
 
 ## Settings
 
@@ -70,7 +65,7 @@ For SQL Alchemy to connect to the database, the driver has to be specified in th
 
 There are two ways to accomplish this.
 
-First, by providing it in the `sqlalchemy_url_query_options`:
+First, by providing it in the `sqlalchemy_url_query_options` as key/value pairs:
 
 ```yaml
 sqlalchemy_url_query_options:
@@ -153,11 +148,10 @@ meltano invoke tap-mssql --version
 meltano elt tap-mssql target-jsonl
 ```
 
-### SDK Dev Guide
-
-See the [dev guide](https://sdk.meltano.com/en/latest/dev_guide.html) for more instructions on how to use the SDK to
-develop your own taps and targets.
-
 ### How to Set Up Log-Based Replication (Change Tracking)
 
-A great guide for setting up change tracking for a database is available on [Stitch](https://www.stitchdata.com/docs/integrations/databases/microsoft-sql-server/v1#extract-data)
+This tap uses [Change Tracking](https://learn.microsoft.com/en-us/sql/relational-databases/track-changes/about-change-tracking-sql-server?view=sql-server-ver16)
+for incremental replication. This is not the same as Change Data Capture / CDC, which is not supported by this tap.
+
+Change Tracking must be enabled on the database and tables prior to capturing incremental changes.
+A great guide for setting up change tracking for a database is available in the [Stitch](https://www.stitchdata.com/docs/integrations/databases/microsoft-sql-server/v1#extract-data) documentation.
