@@ -28,7 +28,7 @@ pyodbc = "^5.2.0"
 [tool.poetry.group.dev.dependencies]
 pytest = ">=8"
 singer-sdk = { version="~=0.44.3", extras = ["testing"] }
-ruff = "^0.9.4"
+ruff = "^0.9.6"
 
 [tool.poetry.extras]
 s3 = ["fs-s3fs"]
