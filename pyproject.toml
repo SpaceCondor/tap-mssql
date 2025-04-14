@@ -21,13 +21,13 @@ license = "Apache-2.0"
 
 [tool.poetry.dependencies]
 python = ">=3.9,<4.0"
-singer-sdk = { version="~=0.45.5", extras = ["faker"] }
+singer-sdk = { version="~=0.45.6", extras = ["faker"] }
 fs-s3fs = { version = "~=1.1.1", optional = true }
 pyodbc = "^5.2.0"
 
 [tool.poetry.group.dev.dependencies]
 pytest = ">=8"
-singer-sdk = { version="~=0.45.5", extras = ["testing"] }
+singer-sdk = { version="~=0.45.6", extras = ["testing"] }
 ruff = "^0.11.2"
 
 [tool.poetry.extras]
